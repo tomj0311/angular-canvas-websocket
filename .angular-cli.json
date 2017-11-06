@@ -36,6 +36,7 @@
   },
   "lint": [
     {
+      "files": "src/**/*.ts",
       "project": "src/tsconfig.app.json"
     },
     {
@@ -51,6 +52,7 @@
     }
   },
   "defaults": {
+    "lintFix": true,
     "styleExt": "css",
     "component": {}
   }
