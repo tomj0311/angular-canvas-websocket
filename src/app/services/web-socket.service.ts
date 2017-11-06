@@ -9,10 +9,10 @@ export class WebSocketService {
 
   public connect(url): Rx.Subject<MessageEvent> {
     if (!this.subject) {
-			this.subject = this.create(url);
-      console.log('Successfully connected: ' + url);
-		}
-		return this.subject;
+		this.subject = this.create(url);
+      	console.log('Successfully connected: ' + url);
+	}
+	return this.subject;
   }
 
   private create(url): Rx.Subject<MessageEvent> {
@@ -29,7 +29,7 @@ export class WebSocketService {
 		const observer = {
 			next: (data: Object) => {
 				if (ws.readyState === WebSocket.OPEN) {
-					ws.send(JSON.stringify(data));
+					ws.send(data);
 				}
 			}
 		}

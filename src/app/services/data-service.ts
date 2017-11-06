@@ -19,18 +19,17 @@ export interface ResponseData {
 @Injectable()
 export class DataService {
 
-	public messages: Subject<RequestData>;
+	public messages: Subject<string>;
 
 	constructor(wsService: WebSocketService) {
-		this.messages = <Subject<RequestData>>wsService
+		this.messages = <Subject<string>>wsService
 			.connect(CHAT_URL)
-			.map((response: MessageEvent): RequestData => {
-        let data = JSON.parse(response.data);
-        return data;
-				//return {
-        //  DateTime: data.DateTime,
-				//	Randomized: data.Randomized
-				// }
-			});
+			.map((response: MessageEvent): string => {
+        		return response.data;
+			// return {
+        	//  DateTime: data.DateTime,
+			//	Randomized: data.Randomized
+			// }
+		});
 	}
 }

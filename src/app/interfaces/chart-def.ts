@@ -1,5 +1,5 @@
 export interface DataPoint {
-    x: number;
+    x: string;
     y: number;
 }
 
@@ -23,6 +23,6 @@ export interface RequestModel {
 }
 
 export interface ResponseModel {
-    DateTime: Date;
-    RandomNumber: number;
+    DateTime: string;
+    Randomized: number;
 }

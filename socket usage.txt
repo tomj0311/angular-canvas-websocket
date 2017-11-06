@@ -1,0 +1,9 @@
+var socket = new WebSocket('ws://localhost:8999');
+
+socket.onmessage = function (message) {
+  console.log('Connection 1', message.data);
+};
+ƒ (message) {
+  console.log('Connection 1', message.data);
+}
+socket.send(JSON.stringify({"FromDate":"2017-03-06 10:10:10","ToDate":"2017-03-06 10:10:20","Randomize":1000}))

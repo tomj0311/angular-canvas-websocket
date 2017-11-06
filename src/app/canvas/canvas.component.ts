@@ -1,17 +1,21 @@
 import { Component, Input, ElementRef, AfterViewInit, ViewChild } from '@angular/core';
 
-import { ChartDef, DataPoint } from './interfaces/chart-def';
+import { WebSocketService } from '../services/web-socket.service';
+import { DataService } from '../services/data-service';
+
+import { ChartDef, DataPoint, ResponseModel } from '../interfaces/chart-def';
 
 @Component({
     selector: 'app-canvas',
-    template: '<canvas #canvas></canvas>',
-    styles: ['canvas { border: 1px solid #000; }']
+    templateUrl: './canvas.component.html',
+    styles: ['canvas { border: 1px solid #000; }'],
+    providers: [WebSocketService, DataService]
   })
 
   export class CanvasComponent implements AfterViewInit {
     @ViewChild('canvas') public canvas: ElementRef;
 
-      @Input() public width = 800;
+      @Input() public width = 1200;
       @Input() public height = 600;
 
       private ctx: CanvasRenderingContext2D;
@@ -24,10 +28,43 @@ import { ChartDef, DataPoint } from './interfaces/chart-def';
       private ratio = 0;
 
       private dataObj: ChartDef;
-      private dataPoints: DataPoint[];
+      private dataPoints: DataPoint[] = [];
       private pixelPoints: DataPoint[] = [];
 
+      //default parameter
+      private message = {
+        FromDate: '2017-03-06 10:10:10',
+        ToDate: '2017-03-06 10:11:59',
+        Randomize: 100
+      }
+
+      constructor (private dataService: DataService) {
+
+      }
+
+      sendMsg() {
+        this.dataService.messages.subscribe(msg => {
+          var resdata: ResponseModel[] = JSON.parse(msg);
+          if (resdata.length){
+            this.dataPoints = [];
+            resdata.forEach(element => {
+              this.dataPoints.push({x:element.DateTime, y:element.Randomized});
+            });
+            this.render();
+          }
+        });
+        this.message.FromDate = (<HTMLInputElement>document.getElementById("fromdate")).value;
+        this.message.ToDate = (<HTMLInputElement>document.getElementById("todate")).value;
+        this.message.Randomize = 1000;
+
+        this.dataService.messages.next(JSON.stringify(this.message));
+      }
+
       public ngAfterViewInit() {
+
+        (<HTMLInputElement>document.getElementById("fromdate")).value = new Date().toString();
+        (<HTMLInputElement>document.getElementById("todate")).value = new Date().toString();
+
         const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
         this.ctx = canvasEl.getContext('2d');
 
@@ -36,16 +73,11 @@ import { ChartDef, DataPoint } from './interfaces/chart-def';
 
         //default data
         this.dataPoints = [
-          {x: 1, y: 10 },
-          {x: 2, y: 15 },
-          {x: 3, y: 5 },
-          {x: 4, y: 8 },
-          {x: 4, y: 80 },
-          {x: 4, y: 17 },
-          {x: 4, y: 1 },
-          {x: 4, y: 28 },
-          {x: 4, y: 38 },
-          {x: 5, y: 49 }
+          {x: '1', y: 10 },
+          {x: '2', y: 15 },
+          {x: '3', y: 5 },
+          {x: '4', y: 8 },
+          {x: '5', y: 80 }
         ];
 
         this.dataObj = {
@@ -67,6 +99,7 @@ import { ChartDef, DataPoint } from './interfaces/chart-def';
 
       public render() {
         if (!this.ctx) { return; }
+        this.ctx.clearRect(0, 0, this.width, this.height);
         this.getMaxDataYValue();
         this.xMax = this.width - (this.margin.left + this.margin.right);
         this.yMax = this.height - (this.margin.top + this.margin.bottom);
@@ -121,7 +154,11 @@ import { ChartDef, DataPoint } from './interfaces/chart-def';
 
     public renderData = function() {
       const xInc = this.getXInc();
-      let prevX = 50,
+      if(xInc == 0){
+        console.log('Data too large to be drawn on this canvas');
+        return;
+      }
+      let prevX = 0,
           prevY = 0;
 
       for (let i = 0; i < this.dataPoints.length; i++) {
@@ -152,7 +189,7 @@ import { ChartDef, DataPoint } from './interfaces/chart-def';
     }
 
     private getXInc = function() {
-      return Math.round(this.xMax / this.dataPoints.length) - 1;
+      return Math.round(this.xMax / this.dataPoints.length) ;
     }
   }
 
