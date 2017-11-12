@@ -17,9 +17,10 @@ export interface MessageData {
 }
 
 export interface RequestModel {
-    FromDate: Date;
-    ToDate: Date;
+    FromDate: string;
+    ToDate: string;
     Randomize: number;
+    Points: number;
 }
 
 export interface ResponseModel {

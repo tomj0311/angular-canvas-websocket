@@ -3,7 +3,7 @@ import { Component, Input, ElementRef, AfterViewInit, ViewChild } from '@angular
 import { WebSocketService } from '../services/web-socket.service';
 import { DataService } from '../services/data-service';
 
-import { ChartDef, DataPoint, ResponseModel } from '../interfaces/chart-def';
+import { ChartDef, DataPoint, ResponseModel, RequestModel } from '../interfaces/chart-def';
 
 @Component({
     selector: 'app-canvas',
@@ -35,50 +35,66 @@ import { ChartDef, DataPoint, ResponseModel } from '../interfaces/chart-def';
       private message = {
         FromDate: '2017-03-06 10:10:10',
         ToDate: '2017-03-06 10:11:59',
-        Randomize: 100
+        Randomize: 100,
+        Interval: 1000,
+        Message: 'start'
       }
 
       constructor (private dataService: DataService) {
 
       }
 
-      sendMsg() {
+      public Subscribe() {
         this.dataService.messages.subscribe(msg => {
-          var resdata: ResponseModel[] = JSON.parse(msg);
-          if (resdata.length){
-            this.dataPoints = [];
-            resdata.forEach(element => {
-              this.dataPoints.push({x:element.DateTime, y:element.Randomized});
-            });
+          console.log(msg);
+          var resdata: ResponseModel = JSON.parse(msg);
+          if (resdata){
+            
+            this.dataPoints.push({x:resdata.DateTime, y:resdata.Randomized});
+            
+            if (this.dataPoints.length == 20) {
+              this.dataPoints.splice(1,1);
+            }
+            
             this.render();
-          }
+            console.log(this.dataPoints);              
+          } 
         });
-        this.message.FromDate = (<HTMLInputElement>document.getElementById("fromdate")).value;
-        this.message.ToDate = (<HTMLInputElement>document.getElementById("todate")).value;
+      }
+
+      public Play() {
+        this.message.FromDate = (<HTMLInputElement>document.getElementById("fromdate")).value.toString();
+        this.message.ToDate = (<HTMLInputElement>document.getElementById("todate")).value.toString();
         this.message.Randomize = 1000;
+        this.message.Interval = 300;
+        this.message.Message = 'start';
 
         this.dataService.messages.next(JSON.stringify(this.message));
+        this.Subscribe();
+      }
+
+      public Stop() {
+        this.message.FromDate = (<HTMLInputElement>document.getElementById("fromdate")).value.toString();
+        this.message.ToDate = (<HTMLInputElement>document.getElementById("todate")).value.toString();
+        this.message.Randomize = 1000;
+        this.message.Interval = 300;
+        this.message.Message = 'stop';
+
+        this.dataService.messages.next(JSON.stringify(this.message));
+        this.Subscribe();
       }
 
       public ngAfterViewInit() {
 
-        (<HTMLInputElement>document.getElementById("fromdate")).value = new Date().toString();
-        (<HTMLInputElement>document.getElementById("todate")).value = new Date().toString();
+        let adate = new Date();
+        (<HTMLInputElement>document.getElementById("fromdate")).value = adate.toString();
+        (<HTMLInputElement>document.getElementById("todate")).value =  new Date(adate.setSeconds(adate.getSeconds() + 1000)).toString();
 
         const canvasEl: HTMLCanvasElement = this.canvas.nativeElement;
         this.ctx = canvasEl.getContext('2d');
 
         canvasEl.width = this.width;
         canvasEl.height = this.height;
-
-        //default data
-        this.dataPoints = [
-          {x: '1', y: 10 },
-          {x: '2', y: 15 },
-          {x: '3', y: 5 },
-          {x: '4', y: 8 },
-          {x: '5', y: 80 }
-        ];
 
         this.dataObj = {
           title: 'My Chart',
@@ -169,7 +185,7 @@ import { ChartDef, DataPoint, ResponseModel } from '../interfaces/chart-def';
 
         if (i > 0) {
           //Draw connecting lines
-          this.drawLine(ptX, ptY, prevX, prevY, 'black', 2);
+            this.drawLine(ptX, ptY, prevX, prevY, 'black', 2);
         }
         prevX = ptX;
         prevY = ptY;
