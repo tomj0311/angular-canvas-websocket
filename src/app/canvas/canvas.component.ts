@@ -46,7 +46,6 @@ import { ChartDef, DataPoint, ResponseModel, RequestModel } from '../interfaces/
 
       public Subscribe() {
         this.dataService.messages.subscribe(msg => {
-          console.log(msg);
           var resdata: ResponseModel = JSON.parse(msg);
           if (resdata){
             
@@ -66,7 +65,7 @@ import { ChartDef, DataPoint, ResponseModel, RequestModel } from '../interfaces/
         this.message.FromDate = (<HTMLInputElement>document.getElementById("fromdate")).value.toString();
         this.message.ToDate = (<HTMLInputElement>document.getElementById("todate")).value.toString();
         this.message.Randomize = 1000;
-        this.message.Interval = 300;
+        this.message.Interval = 500;
         this.message.Message = 'start';
 
         this.dataService.messages.next(JSON.stringify(this.message));
